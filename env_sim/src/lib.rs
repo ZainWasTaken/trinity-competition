@@ -23,7 +23,6 @@ enum Square {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum Change {
-    Nop,
     Die,
     BecomeSpecies(String),
     ConversionProgress(usize),
@@ -43,13 +42,6 @@ struct Species {
 }
 
 impl Square {
-    fn is_empty(&self) -> bool {
-        if let Square::Occupied(_) = self {
-            false
-        } else {
-            true
-        }
-    }
     fn is_occupied(&self) -> bool {
         if let Square::Occupied(_) = self {
             true
@@ -112,7 +104,6 @@ impl Simulation {
             let pos = &mut self.data[*x][*y];
             for change in changes {
                 match change {
-                    Change::Nop => {}
                     Change::Die => {
                         *pos = Square::Empty {
                             converted_to: None,
@@ -154,6 +145,9 @@ impl Simulation {
                     }
                     Change::Eat => pos.unwrap_organism_mut().time_since_eaten = 0,
                 }
+            }
+            if let Square::Occupied(org) = pos {
+                org.breeding_potential += self.specieses.get(&org.species).unwrap().growth_speed;
             }
         }
     }
@@ -294,6 +288,7 @@ impl Simulation {
                                             .get(&(thing_x, thing_y))
                                             .unwrap()
                                             .contains(&Change::Bred))
+                                    && thing.breeding_potential > 20
                                 {
                                     *values.entry((thing_x, thing_y, thing)).or_insert(0) +=
                                         thing.breeding_potential;
@@ -344,6 +339,7 @@ impl Simulation {
                                             .get(&(thing_x, thing_y))
                                             .unwrap()
                                             .contains(&Change::Bred))
+                                    && thing.breeding_potential > 20
                                     && &thing.species == species_name
                                 {
                                     *values.entry((thing_x, thing_y, thing)).or_insert(0) +=

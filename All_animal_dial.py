@@ -1,5 +1,8 @@
+from distutils import command
 import tkinter as tk
 from tkinter import Canvas, ttk
+import tkinter
+
 
 root = tk.Tk()
 root.geometry('400x300')
@@ -180,6 +183,57 @@ Grass_slider.grid(
     sticky='we'
 )
 
+new_animals = []
+num_new_animals = 0
+
+nval = tk.DoubleVar()
+def New_get_current_value():
+    return '{: .2f}'.format(nval.get())
+
+def print_new_val(event, nlabel):
+    nlabel.configure(text=New_get_current_value())
+    scalenum=round(nval.get())
+    print(scalenum)
+
+def cslider(nlabel, nslider, nvalue, nvaluel, text):
+    nlabel = ttk.Label(
+        root,
+        text=(text)
+    )
+    nslider = ttk.Scale(
+    root,
+    from_=0,
+    to=100,
+    orient='horizontal',  # vertical
+    variable=nval,
+    command=print_new_val(command, nlabel)
+    )
+    nvaluel = ttk.Label(
+    root,
+    text=New_get_current_value()
+    )
+    nslider.grid(column=30, row=10, sticky="we")
+    nlabel.grid(column=30, row=15, sticky="we")
+    nvaluel.grid(column=30, row=20, sticky="we")
+
+
+    
+
+
+def add_new_animal():
+    new_animals.append(new_animal.get())
+    lennum = 0
+    for i in new_animals:
+        lennum = lennum+1
+        if lennum == len(new_animals):
+            print(i)
+            cslider(i, i , i, i, i)
+
+
+new_animal=tk.Button(root, text="Add New Animal", command=add_new_animal)
+new_animal.grid(row=3, column=30)
+
+
 tk.Label(
     root,
     text="New Species:"
@@ -187,5 +241,10 @@ tk.Label(
 
 new_animal = tk.Entry(root)
 new_animal.grid(row=0, column=40)
+
+
+
+
+
 
 root.mainloop()
