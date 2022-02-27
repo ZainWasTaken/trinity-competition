@@ -81,7 +81,7 @@ fn wrap_around(p1: isize, p2: usize) -> usize {
     if p1 > 0 {
         return (p1 as usize + p2) % p2;
     }
-    return p2 - (p1 * -1) as usize;
+    return (p1 * -1) as usize;
 }
 
 impl Simulation {
