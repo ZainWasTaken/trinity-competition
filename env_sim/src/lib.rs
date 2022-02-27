@@ -222,6 +222,7 @@ impl Simulation {
     }
 
     pub fn get_frame(&self) -> (Vec<Option<String>>, usize, usize) {
+        println!("FROM RUST: THIS IS THE DATA: {:?}", self.data);
         let mut disp = Vec::with_capacity(self.width * self.height);
         for t in &self.data {
             disp.extend(t.clone())
