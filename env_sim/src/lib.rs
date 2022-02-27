@@ -10,6 +10,7 @@ pub struct Simulation {
     width: usize,
     height: usize,
     changes: BTreeMap<(usize, usize), Vec<Change>>,
+    steps: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -74,14 +75,13 @@ struct Organism {
     time_since_eaten: usize,
 }
 
-fn wrap_around(p1: isize, p2: usize) -> usize {
-    if (p1.abs() as usize) < p2 {
-        return (p2 as isize + p1) as usize;
+fn wrap_around(p1: isize, p2: usize, p3: usize) -> usize {
+    let p4 = p2 as isize + p1;
+    if p4 < 0 {
+        return p3 - ((p4 * -1) as usize);
+    } else {
+        return (p4 % p3 as isize) as usize;
     }
-    if p1 > 0 {
-        return (p1 as usize + p2) % p2;
-    }
-    return (p1 * -1) as usize;
 }
 
 impl Simulation {
@@ -90,8 +90,8 @@ impl Simulation {
         for dx in -1..=1 {
             for dy in -1..=1 {
                 if dy != 0 && dx != 0 {
-                    let square_x = wrap_around(dx, x);
-                    let square_y = wrap_around(dy, y);
+                    let square_x = wrap_around(dx, x, self.width);
+                    let square_y = wrap_around(dy, y, self.height);
                     t.push((square_x, square_y, &self.data[square_x][square_y]))
                 }
             }
@@ -136,18 +136,30 @@ impl Simulation {
                     },
                     Change::Bred => pos.unwrap_organism_mut().breeding_potential = 0,
                     Change::LoseHealth(h) => {
-                        pos.unwrap_organism_mut().health =
-                            pos.unwrap_organism_mut().health.saturating_sub(*h)
+                        if let Square::Occupied(org) = pos {
+                            org.health = org.health.saturating_sub(*h)
+                        }
                     }
                     Change::NotEat => {
-                        pos.unwrap_organism_mut().time_since_eaten =
-                            pos.unwrap_organism_mut().time_since_eaten.saturating_sub(1)
+                        if let Square::Occupied(org) = pos {
+                            org.time_since_eaten = org.time_since_eaten + 1;
+                        }
                     }
-                    Change::Eat => pos.unwrap_organism_mut().time_since_eaten = 0,
+                    Change::Eat => {
+                        pos.unwrap_organism_mut().time_since_eaten = 0;
+                    }
                 }
             }
             if let Square::Occupied(org) = pos {
-                org.breeding_potential += self.specieses.get(&org.species).unwrap().growth_speed;
+                if org.time_since_eaten > self.specieses.get(&org.species).unwrap().hardiness {
+                    *pos = Square::Empty {
+                        converted_to: None,
+                        conversion_progress: 0,
+                    }
+                } else {
+                    org.breeding_potential +=
+                        self.specieses.get(&org.species).unwrap().growth_speed;
+                }
             }
         }
     }
@@ -160,6 +172,7 @@ impl Simulation {
         let width = width.unwrap_or(300);
         let height = height.unwrap_or(300);
         Simulation {
+            steps: 0,
             specieses: BTreeMap::new(),
             data: vec![
                 vec![
@@ -200,7 +213,7 @@ impl Simulation {
                     if !a.is_occupied() {
                         *a = Square::Occupied(Organism {
                             species: name.clone(),
-                            health: hardiness.unwrap_or(20),
+                            health: hardiness.unwrap_or(1),
                             age: 0,
                             breeding_potential: 0,
                             time_since_eaten: 0,
@@ -209,8 +222,8 @@ impl Simulation {
                 }
             }
         } else {
-            for _ in 0..5 {
-                let mut rand = rand::thread_rng();
+            let mut rand = rand::thread_rng();
+            for _ in 0..100 {
                 self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
                     Square::Occupied(Organism {
                         species: name.clone(),
@@ -281,6 +294,7 @@ impl Simulation {
                                     'eating: for (other_x, other_y, other_square) in not_empty {
                                         let other_org = other_square.unwrap_organism();
                                         if eats.contains(&other_org.species) {
+                                            println!("Ate at {x}, {y}");
                                             self.changes
                                                 .entry((other_x, other_y))
                                                 .or_default()
