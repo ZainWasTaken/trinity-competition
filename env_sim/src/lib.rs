@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use pyo3::{pyclass, pymethods, pymodule, types::PyModule, PyResult, Python};
+use rand::Rng;
 
 #[pyclass]
 pub struct Simulation {
@@ -190,7 +191,34 @@ impl Simulation {
                 growth_speed: growth_speed.unwrap_or(5),
                 breeding_age: breeding_age.unwrap_or(5),
             };
-            self.specieses.insert(name, spec);
+            self.specieses.insert(name.clone(), spec);
+            if eats.contains(&"sunlight".to_string()) {
+                for t in &mut self.data {
+                    for a in t.iter_mut() {
+                        if !a.is_occupied() {
+                            a = Organism {
+                                species: name.clone(),
+                                health: hardiness.unwrap_or(20),
+                                age: 0,
+                                breeding_potential: 0,
+                                time_since_eaten: 0,
+                            }
+                        }
+                    }
+                }
+            } else {
+                for _ in 0..5 {
+                    let rand = rand::thread_rng();
+                    self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
+                        Square::Occupied(Organism {
+                            species: name.clone(),
+                            health: hardiness.unwrap_or(20),
+                            age: 0,
+                            breeding_potential: 0,
+                            time_since_eaten: 0,
+                        })
+                }
+            }
         }
     }
 
