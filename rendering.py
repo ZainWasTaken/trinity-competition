@@ -42,4 +42,4 @@ while True:
     canvas.pack()
     s.advance()
     root.update()
-    time.sleep(0.016)
+    time.sleep(1)

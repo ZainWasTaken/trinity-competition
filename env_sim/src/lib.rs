@@ -202,7 +202,7 @@ impl Simulation {
         }
         let spec = Species {
             eats: eats.clone(),
-            hardiness: hardiness.unwrap_or(5),
+            hardiness: hardiness.unwrap_or(20),
             growth_speed: growth_speed.unwrap_or(5),
             breeding_age: breeding_age.unwrap_or(5),
         };
@@ -223,7 +223,7 @@ impl Simulation {
             }
         } else {
             let mut rand = rand::thread_rng();
-            for _ in 0..100 {
+            for _ in 0..300 {
                 self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
                     Square::Occupied(Organism {
                         species: name.clone(),
