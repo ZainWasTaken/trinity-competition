@@ -30,9 +30,9 @@ def render():
 # def endClickDetection():
 #        canvas.unbind("<Button-1>")
 
-s.add_species(name="Lion", eats=["Zebra"])
+s.add_species(name="Lion", eats=["Zebra", "Vulture"])
 s.add_species(name="Zebra", eats=["Grass"])
-s.add_species(name="Vulture", eats=["Lion"])
+s.add_species(name="Vulture", eats=["Lion", "Zebra"])
 s.add_species(name="Grass", eats=["sunlight"])
 res, width, height = s.get_frame()
 canvas = Canvas(root, width=width * 10, height=height * 10)
@@ -42,4 +42,4 @@ while True:
     canvas.pack()
     s.advance()
     root.update()
-    time.sleep(1)
+    time.sleep(0.5)
