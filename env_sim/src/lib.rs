@@ -298,7 +298,6 @@ impl Simulation {
                                     'eating: for (other_x, other_y, other_square) in not_empty {
                                         let other_org = other_square.unwrap_organism();
                                         if eats.contains(&other_org.species) {
-                                            println!("Ate at {x}, {y}");
                                             self.changes
                                                 .entry((other_x, other_y))
                                                 .or_default()
