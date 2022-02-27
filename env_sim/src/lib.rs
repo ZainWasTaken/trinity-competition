@@ -5,7 +5,6 @@ use pyo3::{pyclass, pymethods, pymodule, types::PyModule, PyResult, Python};
 #[pyclass]
 pub struct Simulation {
     specieses: BTreeMap<String, Species>,
-    current_disp: Vec<Option<String>>,
     data: Vec<Vec<Square>>,
     width: usize,
     height: usize,
@@ -161,7 +160,6 @@ impl Simulation {
         let height = height.unwrap_or(300);
         Simulation {
             specieses: BTreeMap::new(),
-            current_disp: Vec::new(),
             data: vec![
                 vec![
                     Square::Empty {
@@ -197,7 +195,18 @@ impl Simulation {
     }
 
     pub fn get_frame(&self) -> (Vec<Option<String>>, usize, usize) {
-        (self.current_disp.clone(), self.width, self.height)
+        let mut disp = Vec::with_capacity(self.width * self.height);
+        for t in &self.data {
+            disp.extend(t.clone())
+        }
+        let disp = disp
+            .into_iter()
+            .map(|x| match x {
+                Square::Occupied(org) => Some(org.species),
+                _ => None,
+            })
+            .collect();
+        (disp, self.width, self.height)
     }
 
     pub fn remove_species(&mut self, name: String) {
