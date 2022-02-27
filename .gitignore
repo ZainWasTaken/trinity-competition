@@ -4,3 +4,4 @@
 tmp/
 
 env_sim/target
+/.env/
