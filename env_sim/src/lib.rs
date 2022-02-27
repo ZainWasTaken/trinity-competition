@@ -134,7 +134,11 @@ impl Simulation {
                         } => *s = Some(name.clone()),
                         _ => panic!(),
                     },
-                    Change::Bred => pos.unwrap_organism_mut().breeding_potential = 0,
+                    Change::Bred => {
+                        if let Square::Occupied(org) = pos {
+                            org.breeding_potential = 0;
+                        }
+                    }
                     Change::LoseHealth(h) => {
                         if let Square::Occupied(org) = pos {
                             org.health = org.health.saturating_sub(*h)
@@ -329,45 +333,60 @@ impl Simulation {
                         conversion_progress: _,
                     } => {
                         if !not_empty.is_empty() {
-                            let mut values = BTreeMap::new();
-                            for (thing_x, thing_y, thing) in not_empty {
-                                let thing = thing.unwrap_organism();
-                                if thing.age
-                                    > self.specieses.get(&thing.species).unwrap().breeding_age
-                                    && (self.changes.get(&(thing_x, thing_y)).is_none()
-                                        || !self
-                                            .changes
-                                            .get(&(thing_x, thing_y))
-                                            .unwrap()
-                                            .contains(&Change::Bred))
-                                    && thing.breeding_potential > 20
-                                {
-                                    *values.entry((thing_x, thing_y, thing)).or_insert(0) +=
-                                        thing.breeding_potential;
-                                }
-                            }
-                            let mut highest = 0;
-                            let mut breeder = None;
-                            for (details, score) in values {
-                                if score > highest {
-                                    highest = score;
-                                    breeder = Some(details);
-                                }
-                            }
-                            if let Some((pos_x, pos_y, breeder)) = breeder {
-                                let spec = breeder.species.clone();
-                                self.changes
-                                    .entry((pos_x, pos_y))
-                                    .or_insert(Vec::new())
-                                    .push(Change::Bred);
-                                self.changes
-                                    .entry((x, y))
-                                    .or_insert(Vec::new())
-                                    .extend_from_slice(&[
-                                        Change::StartConverting(spec),
-                                        Change::ConversionProgress(highest),
-                                    ]);
-                            }
+                            let breeder = not_empty[0].2.unwrap_organism();
+                            let pos_x = not_empty[0].0;
+                            let pos_y = not_empty[0].1;
+                            let spec = breeder.species.clone();
+                            self.changes
+                                .entry((pos_x, pos_y))
+                                .or_insert(Vec::new())
+                                .push(Change::Bred);
+                            self.changes
+                                .entry((x, y))
+                                .or_insert(Vec::new())
+                                .extend_from_slice(&[
+                                    Change::StartConverting(spec),
+                                    Change::ConversionProgress(5),
+                                ]);
+                            // let mut values = BTreeMap::new();
+                            // for (thing_x, thing_y, thing) in not_empty {
+                            //     let thing = thing.unwrap_organism();
+                            //     if thing.age
+                            //         > self.specieses.get(&thing.species).unwrap().breeding_age
+                            //         && (self.changes.get(&(thing_x, thing_y)).is_none()
+                            //             || !self
+                            //                 .changes
+                            //                 .get(&(thing_x, thing_y))
+                            //                 .unwrap()
+                            //                 .contains(&Change::Bred))
+                            //         && thing.breeding_potential > 20
+                            //     {
+                            //         *values.entry((thing_x, thing_y, thing)).or_insert(0) +=
+                            //             thing.breeding_potential;
+                            //     }
+                            // }
+                            // let mut highest = 0;
+                            // let mut breeder = None;
+                            // for (details, score) in values {
+                            //     if score > highest {
+                            //         highest = score;
+                            //         breeder = Some(details);
+                            //     }
+                            // }
+                            // if let Some((pos_x, pos_y, breeder)) = breeder {
+                            //     let spec = breeder.species.clone();
+                            //     self.changes
+                            //         .entry((pos_x, pos_y))
+                            //         .or_insert(Vec::new())
+                            //         .push(Change::Bred);
+                            //     self.changes
+                            //         .entry((x, y))
+                            //         .or_insert(Vec::new())
+                            //         .extend_from_slice(&[
+                            //             Change::StartConverting(spec),
+                            //             Change::ConversionProgress(highest),
+                            //         ]);
+                            // }
                         }
                     }
                     Square::Empty {
@@ -380,42 +399,57 @@ impl Simulation {
                                 .or_insert(Vec::new())
                                 .push(Change::BecomeSpecies(species_name.to_string()));
                         } else if !not_empty.is_empty() {
-                            let mut values = BTreeMap::new();
-                            for (thing_x, thing_y, thing) in not_empty {
-                                let thing = thing.unwrap_organism();
-                                if thing.age
-                                    > self.specieses.get(&thing.species).unwrap().breeding_age
-                                    && (self.changes.get(&(thing_x, thing_y)).is_none()
-                                        || !self
-                                            .changes
-                                            .get(&(thing_x, thing_y))
-                                            .unwrap()
-                                            .contains(&Change::Bred))
-                                    && thing.breeding_potential > 20
-                                    && &thing.species == species_name
-                                {
-                                    *values.entry((thing_x, thing_y, thing)).or_insert(0) +=
-                                        thing.breeding_potential;
-                                }
-                            }
-                            let mut highest = 0;
-                            let mut breeder = None;
-                            for (details, score) in values {
-                                if score > highest {
-                                    highest = score;
-                                    breeder = Some(details);
-                                }
-                            }
-                            if let Some((pos_x, pos_y, _)) = breeder {
-                                self.changes
-                                    .entry((pos_x, pos_y))
-                                    .or_insert(Vec::new())
-                                    .push(Change::Bred);
-                                self.changes
-                                    .entry((x, y))
-                                    .or_insert(Vec::new())
-                                    .extend_from_slice(&[Change::ConversionProgress(highest)]);
-                            }
+                            let breeder = not_empty[0].2.unwrap_organism();
+                            let pos_x = not_empty[0].0;
+                            let pos_y = not_empty[0].1;
+                            let spec = breeder.species.clone();
+                            self.changes
+                                .entry((pos_x, pos_y))
+                                .or_insert(Vec::new())
+                                .push(Change::Bred);
+                            self.changes
+                                .entry((x, y))
+                                .or_insert(Vec::new())
+                                .extend_from_slice(&[
+                                    Change::StartConverting(spec),
+                                    Change::ConversionProgress(5),
+                                ]);
+                            // let mut values = BTreeMap::new();
+                            // for (thing_x, thing_y, thing) in not_empty {
+                            //     let thing = thing.unwrap_organism();
+                            //     if thing.age
+                            //         > self.specieses.get(&thing.species).unwrap().breeding_age
+                            //         && (self.changes.get(&(thing_x, thing_y)).is_none()
+                            //             || !self
+                            //                 .changes
+                            //                 .get(&(thing_x, thing_y))
+                            //                 .unwrap()
+                            //                 .contains(&Change::Bred))
+                            //         && thing.breeding_potential > 20
+                            //         && &thing.species == species_name
+                            //     {
+                            //         *values.entry((thing_x, thing_y, thing)).or_insert(0) +=
+                            //             thing.breeding_potential;
+                            //     }
+                            // }
+                            // let mut highest = 0;
+                            // let mut breeder = None;
+                            // for (details, score) in values {
+                            //     if score > highest {
+                            //         highest = score;
+                            //         breeder = Some(details);
+                            //     }
+                            // }
+                            // if let Some((pos_x, pos_y, _)) = breeder {
+                            //     self.changes
+                            //         .entry((pos_x, pos_y))
+                            //         .or_insert(Vec::new())
+                            //         .push(Change::Bred);
+                            //     self.changes
+                            //         .entry((x, y))
+                            //         .or_insert(Vec::new())
+                            //         .extend_from_slice(&[Change::ConversionProgress(highest)]);
+                            // }
                         }
                     }
                 }
