@@ -1,0 +1,3 @@
+speciesColorDictionary = []
+import attributeSliders
+
