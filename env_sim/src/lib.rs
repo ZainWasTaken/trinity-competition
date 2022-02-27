@@ -184,40 +184,41 @@ impl Simulation {
         growth_speed: Option<usize>,
         breeding_age: Option<usize>,
     ) {
-        if !self.specieses.contains_key(&name) {
-            let spec = Species {
-                eats: eats.clone(),
-                hardiness: hardiness.unwrap_or(5),
-                growth_speed: growth_speed.unwrap_or(5),
-                breeding_age: breeding_age.unwrap_or(5),
-            };
-            self.specieses.insert(name.clone(), spec);
-            if eats.contains(&"sunlight".to_string()) {
-                for t in &mut self.data {
-                    for a in t.iter_mut() {
-                        if !a.is_occupied() {
-                            *a = Square::Occupied(Organism {
-                                species: name.clone(),
-                                health: hardiness.unwrap_or(20),
-                                age: 0,
-                                breeding_potential: 0,
-                                time_since_eaten: 0,
-                            })
-                        }
-                    }
-                }
-            } else {
-                for _ in 0..5 {
-                    let mut rand = rand::thread_rng();
-                    self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
-                        Square::Occupied(Organism {
+        if self.specieses.contains_key(&name) {
+            self.specieses.remove(&name);
+        }
+        let spec = Species {
+            eats: eats.clone(),
+            hardiness: hardiness.unwrap_or(5),
+            growth_speed: growth_speed.unwrap_or(5),
+            breeding_age: breeding_age.unwrap_or(5),
+        };
+        self.specieses.insert(name.clone(), spec);
+        if eats.contains(&"sunlight".to_string()) {
+            for t in &mut self.data {
+                for a in t.iter_mut() {
+                    if !a.is_occupied() {
+                        *a = Square::Occupied(Organism {
                             species: name.clone(),
                             health: hardiness.unwrap_or(20),
                             age: 0,
                             breeding_potential: 0,
                             time_since_eaten: 0,
                         })
+                    }
                 }
+            }
+        } else {
+            for _ in 0..5 {
+                let mut rand = rand::thread_rng();
+                self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
+                    Square::Occupied(Organism {
+                        species: name.clone(),
+                        health: hardiness.unwrap_or(20),
+                        age: 0,
+                        breeding_potential: 0,
+                        time_since_eaten: 0,
+                    });
             }
         }
     }
@@ -227,7 +228,7 @@ impl Simulation {
         for t in &self.data {
             disp.extend(t.clone())
         }
-        let disp = disp
+        let disp: Vec<Option<String>> = disp
             .into_iter()
             .map(|x| match x {
                 Square::Occupied(org) => Some(org.species),
