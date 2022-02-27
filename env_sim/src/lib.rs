@@ -197,15 +197,13 @@ impl Simulation {
         if eats.contains(&"sunlight".to_string()) {
             for t in &mut self.data {
                 for a in t.iter_mut() {
-                    if !a.is_occupied() {
-                        *a = Square::Occupied(Organism {
-                            species: name.clone(),
-                            health: hardiness.unwrap_or(20),
-                            age: 0,
-                            breeding_potential: 0,
-                            time_since_eaten: 0,
-                        })
-                    }
+                    *a = Square::Occupied(Organism {
+                        species: name.clone(),
+                        health: hardiness.unwrap_or(20),
+                        age: 0,
+                        breeding_potential: 0,
+                        time_since_eaten: 0,
+                    })
                 }
             }
         } else {
