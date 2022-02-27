@@ -3,7 +3,7 @@
 Our submission for the Trinity Hackathon IX.
 
 ## Quick Start
-
+Requires [Rust](https://rustup.rs)
 ``` shell
 $ git clone git@github.com/zemongrabber/trinity-competition
 $ cd trinity-competition

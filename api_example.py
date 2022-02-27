@@ -15,5 +15,8 @@ res, width, height = simulation.get_frame()
 simulation.remove_species("species_name")
 # Will remove the species if it exists, and if it doesn't, does nothing
 
+# change the attributes of a species (hardiness, etc)
+simulation.set_species_attributes("species name", some_value=69, other_value=420)
+
 # Move the simulation forward.
 simulation.advance()
