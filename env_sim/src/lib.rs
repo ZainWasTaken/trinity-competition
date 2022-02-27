@@ -186,7 +186,7 @@ impl Simulation {
     ) {
         if !self.specieses.contains_key(&name) {
             let spec = Species {
-                eats,
+                eats: eats.clone(),
                 hardiness: hardiness.unwrap_or(5),
                 growth_speed: growth_speed.unwrap_or(5),
                 breeding_age: breeding_age.unwrap_or(5),
@@ -196,19 +196,19 @@ impl Simulation {
                 for t in &mut self.data {
                     for a in t.iter_mut() {
                         if !a.is_occupied() {
-                            a = Organism {
+                            *a = Square::Occupied(Organism {
                                 species: name.clone(),
                                 health: hardiness.unwrap_or(20),
                                 age: 0,
                                 breeding_potential: 0,
                                 time_since_eaten: 0,
-                            }
+                            })
                         }
                     }
                 }
             } else {
                 for _ in 0..5 {
-                    let rand = rand::thread_rng();
+                    let mut rand = rand::thread_rng();
                     self.data[rand.gen_range(0..self.width)][rand.gen_range(0..self.height)] =
                         Square::Occupied(Organism {
                             species: name.clone(),
