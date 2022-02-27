@@ -8,7 +8,7 @@ root = tk.Tk()
 root.geometry('400x300')
 root.resizable(False, False)
 root.title('Slider Demo')
-textFont = font.Font(family = 'Lemon Milk',size=20)
+
 
 #animal values
 Lion_current_value = tk.DoubleVar()

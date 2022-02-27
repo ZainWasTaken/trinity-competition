@@ -197,13 +197,15 @@ impl Simulation {
         if eats.contains(&"sunlight".to_string()) {
             for t in &mut self.data {
                 for a in t.iter_mut() {
-                    *a = Square::Occupied(Organism {
-                        species: name.clone(),
-                        health: hardiness.unwrap_or(20),
-                        age: 0,
-                        breeding_potential: 0,
-                        time_since_eaten: 0,
-                    })
+                    if !a.is_occupied() {
+                        *a = Square::Occupied(Organism {
+                            species: name.clone(),
+                            health: hardiness.unwrap_or(20),
+                            age: 0,
+                            breeding_potential: 0,
+                            time_since_eaten: 0,
+                        })
+                    }
                 }
             }
         } else {
@@ -222,7 +224,6 @@ impl Simulation {
     }
 
     pub fn get_frame(&self) -> (Vec<Option<String>>, usize, usize) {
-        println!("FROM RUST: THIS IS THE DATA: {:?}", self.data);
         let mut disp = Vec::with_capacity(self.width * self.height);
         for t in &self.data {
             disp.extend(t.clone())
