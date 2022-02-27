@@ -1,16 +1,17 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import Canvas, ttk
 
 root = tk.Tk()
 root.geometry('400x300')
 root.resizable(False, False)
 root.title('Slider Demo')
 
-
 current_value = tk.DoubleVar()
 
 def get_current_value():
     return '{: .2f}'.format(current_value.get())
+
+
     
 
 
@@ -22,11 +23,12 @@ slider_label = ttk.Label(
 slider_label.grid(
     column=0,
     row=0,
-    sticky='w'
+    sticky='we'
 )
 
 def printval(event):
-    scalenum=current_value.get()
+    value_label.configure(text=get_current_value())
+    scalenum=round(current_value.get())
     print(scalenum)
 
 #  slider
@@ -39,10 +41,19 @@ slider = ttk.Scale(
     command=printval
 )
 
-current_value_label = ttk.Label(
+
+value_label = ttk.Label(
     root,
-    text='Current Value:'
+    text=get_current_value()
 )
+
+value_label.grid(
+    row=3,
+    columnspan=10,
+    sticky='e'
+)
+
+
 slider.grid(
     column=1,
     row=0,
